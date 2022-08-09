@@ -36,8 +36,11 @@ class TweetDfExtractor:
         self.tweets_list = tweets_list
 
     # an example function
-    # def find_statuses_count(self)->list:
-    #     statuses_count 
+
+    def find_statuses_count(self)->list:
+        statuses_count = [data['user']['statuses_count']
+            if 'user' in data else '' for data in self.tweets_list]
+        return statuses_count
         
     def find_full_text(self)->list:
         text = []
@@ -115,14 +118,15 @@ class TweetDfExtractor:
     
         
         
-    def get_tweet_df(self, save=False)->pd.DataFrame:
+    def get_tweet_df(self, save = True)->pd.DataFrame:
         """required column to be generated you should be creative and add more features"""
         
         # columns = [''polarity','subjectivity', 'lang',  
         #     'original_author', 'possibly_sensitive', 'hashtags', 'user_mentions', 'place']
         
-        columns = ['created at','source','original_text','followers_count','friends_count','retweet_count','favorite_count','original_author']
+        columns = ['created at','source','original_text','followers_count','friends_count','retweet_count','favorite_count','original_author','statuses_count']
 
+        statuses_count = self.find_statuses_count()
         created_at = self.find_created_time()
         source = self.find_source()
         text = self.find_full_text()
@@ -138,11 +142,11 @@ class TweetDfExtractor:
         # mentions = self.find_mentions()
         # location = self.find_location()
         #data = zip(created_at, source, text, polarity, subjectivity, lang, fav_count, retweet_count, screen_name, follower_count, friends_count, sensitivity, hashtags, mentions, location)
-        data = zip(created_at, text, source, follower_count,friends_count,retweet_count,fav_count,screen_name)
+        data = zip(created_at, text, source, follower_count,friends_count,retweet_count,fav_count,screen_name,statuses_count)
         df = pd.DataFrame(data=data, columns=columns)
 
         if save:
-            df.to_csv('processed_tweet_data.csv', index=False)
+            df.to_csv('processed_tweet_data.csv', index=True)
             print('File Successfully Saved.!!!')
         
         return df
@@ -152,10 +156,11 @@ if __name__ == "__main__":
     # required column to be generated you should be creative and add more features
     # columns = ['created_at', 'source', 'original_text','clean_text', 'sentiment','polarity','subjectivity', 'lang', 'favorite_count', 'retweet_count', 
     # 'original_author', 'screen_count', 'followers_count','friends_count','possibly_sensitive', 'hashtags', 'user_mentions', 'place', 'place_coord_boundaries']
-    columns = ['created_at','source','original_text','follower_count','friends_count','retweet_count','faviourite_count','original_author']
+    columns = ['created_at','source','original_text','follower_count','friends_count','retweet_count','faviourite_count','original_author','statuses_count']
     _, tweet_list = read_json("Data/africa_twitter_data.json")
     tweet = TweetDfExtractor(tweet_list)
     tweet_df = tweet.get_tweet_df()
+    tweet_df.head(10)
 
 
     # use all defined functions to generate a dataframe with the specified columns above
