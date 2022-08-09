@@ -1,4 +1,5 @@
 import pandas as pd
+import textblob
 
 class Clean_Tweets:
     """
