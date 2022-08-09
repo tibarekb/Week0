@@ -1,4 +1,5 @@
 import pandas as pd
+import textblob
 
 class Clean_Tweets:
     """
@@ -32,7 +33,7 @@ class Clean_Tweets:
         convert column to datetime
         """
         self.df['created_at'] = pd.to_datetime(
-            df['created_at'], errors='coerce')
+             df['created_at'], errors='errors')
 
         self.df = df[df['created_at'] >= '2020-12-31']
         
@@ -61,13 +62,13 @@ class Clean_Tweets:
         
         return df
 
-    if __name__ == "__main__":
-        tweet_df = pd.read_csv("Data/processed_tweet_data.csv")
-        cleaned = Clean_Tweets(tweet_df)
+if __name__ == "__main__":
+    tweet_df = pd.read_csv("processed_tweet_data.csv")
+    cleaned = Clean_Tweets(tweet_df)
    
-        df = cleaned.drop_duplicate(df)
-        df = cleaned.convert_to_datetime(df)
-        df = cleaned.remove_non_english_tweets(df)
+    df = cleaned.drop_duplicate(cleaned.df)
+    df = cleaned.convert_to_datetime(df)
+    df = cleaned.remove_non_english_tweets(df)
 
-        df.to_csv('newclean_tweet_data.csv', index=False)
-        df.to_json('data/newclean_tweet_data.json')
+    df.to_csv('newclean_tweet_data.csv', index=False)
+    df.to_json('data/newclean_tweet_data.json')
