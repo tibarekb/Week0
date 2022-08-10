@@ -1,4 +1,5 @@
 import json
+from re import sub
 from numpy import source
 import pandas as pd
 from textblob import TextBlob
@@ -49,9 +50,16 @@ class TweetDfExtractor:
         return text
        
     
-    # def find_sentiments(self, text)->list:
+    def find_sentiments(self, text)->list:
         
-    #     return polarity, self.subjectivity
+         polarity, subjectivity = [], []
+         for tweet in text:
+            blob = TextBlob(tweet)
+            sentiment = blob.sentiment
+            polarity.append(sentiment.polarity)
+            subjectivity.append(sentiment.subjectivity)
+
+         return polarity, subjectivity
 
     def find_created_time(self)->list:
         created_at = []
@@ -82,13 +90,13 @@ class TweetDfExtractor:
                 if 'user' in data else 0 for data in self.tweets_list]
         return friends_count
 
-    # def is_sensitive(self)->list:
-    #     try:
-    #         is_sensitive = [x['possibly_sensitive'] for x in self.tweets_list]
-    #     except KeyError:
-    #         is_sensitive = None
+    def is_sensitive(self) -> list:
 
-    #     return is_sensitive
+        is_sensitive = [tweet['possibly_sensitive'] if 'possibly_sensitive' in tweet.keys()
+                        else None for tweet in self.tweets_list]
+
+        return is_sensitive
+
 
     def find_favourite_count(self)->list:
         favorite_count = [data['retweeted_status']['favorite_count']
@@ -100,49 +108,58 @@ class TweetDfExtractor:
                          if 'retweeted_status' in data.keys() else 0 for data in self.tweets_list]
         return retweet_count
 
-    # def find_hashtags(self)->list:
-    #     hashtags =
+    def find_hashtags(self)->list:
+        hashtags = [data['entities']['hashtags'] if 'entities' in data.keys(
+        ) else '' for data in self.tweets_list]
+        return hashtags
 
-    # def find_mentions(self)->list:
-    #     mentions = 
+    def find_mentions(self)->list:
+        mentions = [data['entities']['user_mentions']
+                    if 'entities' in data.keys(
+        ) else '' for data in self.tweets_list]
+        return mentions
+
+    def find_lang(self) -> list:
+        lang = [tweet['lang'] for tweet in self.tweets_list]
+
+        return lang
 
 
-    # def find_location(self)->list:
-    #     try:
-    #         location = self.tweets_list['user']['location']
-    #     except TypeError:
-    #         location = ''
-        
+    # def find_location(self) -> list:
+    #     location = [tweet['user']['location'] for tweet in self.tweets_list]
+
     #     return location
-
     
         
         
     def get_tweet_df(self, save = True)->pd.DataFrame:
         """required column to be generated you should be creative and add more features"""
         
-        # columns = [''polarity','subjectivity', 'lang',  
-        #     'original_author', 'possibly_sensitive', 'hashtags', 'user_mentions', 'place']
+        # columns = [' 'lang',  'original_author',   'user_mentions', 'place']
         
-        columns = ['created at','source','original_text','followers_count','friends_count','retweet_count','favorite_count','original_author','statuses_count']
+        columns = ['created at','source','original_text','followers_count','friends_count','retweet_count',
+                   'favorite_count','original_author','statuses_count','hashtags','user_mentions','polarity','subjectivity'
+                   'possibly_sensitive','lang']
 
         statuses_count = self.find_statuses_count()
         created_at = self.find_created_time()
         source = self.find_source()
         text = self.find_full_text()
-        # polarity, subjectivity = self.find_sentiments(text)
-        # lang = self.find_lang()
+        polarity, subjectivity = self.find_sentiments(text)
+        lang = self.find_lang()
         fav_count = self.find_favourite_count()
         retweet_count = self.find_retweet_count()
         screen_name = self.find_screen_name()
         follower_count = self.find_followers_count()
         friends_count = self.find_friends_count()
-        # sensitivity = self.is_sensitive()
-        # hashtags = self.find_hashtags()
-        # mentions = self.find_mentions()
+        sensitivity = self.is_sensitive()
+        hashtags = self.find_hashtags()
+        mentions = self.find_mentions()
         # location = self.find_location()
-        #data = zip(created_at, source, text, polarity, subjectivity, lang, fav_count, retweet_count, screen_name, follower_count, friends_count, sensitivity, hashtags, mentions, location)
-        data = zip(created_at, text, source, follower_count,friends_count,retweet_count,fav_count,screen_name,statuses_count)
+        #data = zip(  lang, screen_name,   mentions, location)
+        data = zip(created_at, text, source, follower_count,friends_count,retweet_count,
+                fav_count,screen_name,statuses_count,hashtags,mentions,polarity,
+                subjectivity,sensitivity,lang)
         df = pd.DataFrame(data=data, columns=columns)
 
         if save:
@@ -154,9 +171,11 @@ class TweetDfExtractor:
                 
 if __name__ == "__main__":
     # required column to be generated you should be creative and add more features
-    # columns = ['created_at', 'source', 'original_text','clean_text', 'sentiment','polarity','subjectivity', 'lang', 'favorite_count', 'retweet_count', 
-    # 'original_author', 'screen_count', 'followers_count','friends_count','possibly_sensitive', 'hashtags', 'user_mentions', 'place', 'place_coord_boundaries']
-    columns = ['created_at','source','original_text','follower_count','friends_count','retweet_count','faviourite_count','original_author','statuses_count']
+    # columns = ['clean_text', 'sentiment','polarity','subjectivity', 'lang',  
+    #'screen_count', friends_count','possibly_sensitive','place', 'place_coord_boundaries']
+    columns = ['created_at','source','original_text','follower_count','friends_count',
+               'retweet_count','faviourite_count','original_author','statuses_count','hashtags','user_mentions'
+               'polarity', 'subjectivity','possibly_sensitive','lang']
     _, tweet_list = read_json("Data/africa_twitter_data.json")
     tweet = TweetDfExtractor(tweet_list)
     tweet_df = tweet.get_tweet_df()

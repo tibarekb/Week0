@@ -50,12 +50,12 @@ class TestTweetDfExtractor(unittest.TestCase):
     def setUp(self) -> pd.DataFrame:
 
         self.df = TweetDfExtractor(tweet_list[:5])
-        # tweet_df = self.df.get_tweet_df()
+        tweet_df = self.df.get_tweet_df()
 
-    def test_find_statuses_count(self):
-        self.assertEqual(
-            self.df.find_statuses_count(), <provide a list of the first five status counts>
-        )
+    # def test_find_statuses_count(self):
+    #     self.assertEqual(
+    #         self.df.find_statuses_count(), <provide a list of the first five status counts>
+    #     )
 
     # def test_find_full_text(self):
     #     text = <provide a list of the first five full texts>
@@ -88,11 +88,11 @@ class TestTweetDfExtractor(unittest.TestCase):
     #     self.assertEqual(self.df.is_sensitive(), <provide a list of the first five is_sensitive values>)
 
 
-    # def test_find_hashtags(self):
-    #     self.assertEqual(self.df.find_hashtags(), )
+    def test_find_hashtags(self):
+        self.assertEqual(self.df.find_hashtags(), )
 
-    # def test_find_mentions(self):
-    #     self.assertEqual(self.df.find_mentions(), )
+    def test_find_mentions(self):
+        self.assertEqual(self.df.find_mentions(), )
 
 
 
