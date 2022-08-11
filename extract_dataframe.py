@@ -120,10 +120,11 @@ class TweetDfExtractor:
         return mentions
 
     def find_lang(self) -> list:
-        lang = [tweet['lang'] for tweet in self.tweets_list]
-
-        return lang
-
+       try:
+            lang = [x['lang'] for x in self.tweets_list]
+       except TypeError:
+            lang = ''
+       return lang
 
     # def find_location(self) -> list:
     #     location = [tweet['user']['location'] for tweet in self.tweets_list]
